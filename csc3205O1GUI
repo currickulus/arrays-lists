@@ -1,0 +1,221 @@
+//Gemini made all of this 
+//I pulled my hair out trying to get that console version
+//After finished and had a working program I gave it to AI and asked it to make a GUI version
+//it lost my switch case statement. I dont know why. I thought that was cool. 
+//It doesnt format "right"
+//At first it spit out a tiny little label up in the corner with just the java logo and an x
+// I had to go back in and edit the code for the JFrame
+//that part with the setsize 400, 350
+//It still doesnt work right.
+//I want it to get a nice data display page in the default little window
+//but you cant see the data output unless you maximize the window so it takes up the whole screen. 
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class csc320CT501GUI extends JFrame {
+
+
+        // ... (rest of your code for action listeners and setVisible(true))
+
+
+
+    private List<double[]> weeklyTemperatures = new ArrayList<>();
+    private int week = 1;
+    private String[] daysOfWeek = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+    private JTextField[] temperatureFields = new JTextField[7];
+
+public csc320CT501GUI() {
+
+    setTitle("Temperature Tracker");
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setSize(400, 350);
+    setLayout(new BorderLayout());
+        JPanel inputPanel = new JPanel(new GridBagLayout());
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+
+        JLabel weekLabel = new JLabel("Week #");
+        JTextField weekField = new JTextField(3);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        inputPanel.add(weekLabel, gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        inputPanel.add(weekField, gbc);
+
+        for (int i = 0; i < 7; i++) {
+            JLabel dayLabel = new JLabel(daysOfWeek[i] + ":");
+            temperatureFields[i] = new JTextField(5);
+
+            gbc.gridx = 0;
+            gbc.gridy = i + 1;
+            inputPanel.add(dayLabel, gbc);
+
+            gbc.gridx = 1;
+            gbc.gridy = i + 1;
+            inputPanel.add(temperatureFields[i], gbc);
+        }
+
+        JButton enterButton = new JButton("Enter Data");
+        JButton modifyButton = new JButton("Modify Data");
+        inputPanel.add(enterButton);
+        inputPanel.add(modifyButton);
+        add(inputPanel, BorderLayout.NORTH);
+
+
+        JTextArea outputArea = new JTextArea();
+        outputArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+        add(scrollPane, BorderLayout.CENTER);
+
+
+        JPanel buttonPanel = new JPanel();
+        JButton printButton = new JButton("Print Data");
+        JButton exitButton = new JButton("Exit");
+        buttonPanel.add(printButton);
+        buttonPanel.add(exitButton);
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        // Action Listeners
+        enterButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                enterData(weekField, outputArea);
+            }
+        });
+
+        modifyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                modifyData(weekField, outputArea);
+            }
+        });
+
+        printButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                printData(outputArea);
+            }
+        });
+
+        exitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+
+        setVisible(true);
+    }
+
+    private void enterData(JTextField weekField, JTextArea outputArea) {
+        try {
+            int week = Integer.parseInt(weekField.getText());
+            if (week > 52 || week < 1) {
+                outputArea.append("Invalid week number. Please enter a number between 1 and 52.\n");
+                return;
+            }
+
+            if (week > this.week) {
+                outputArea.append("You can only enter data for the current or past weeks.\n");
+                return;
+            }
+
+            double[] temperatures = new double[7];
+            for (int i = 0; i < 7; i++) {
+                temperatures[i] = Double.parseDouble(temperatureFields[i].getText());
+            }
+
+
+            if (week <= this.week - 1) {
+                weeklyTemperatures.set(week - 1, temperatures);
+                outputArea.append("Data for Week #" + week + " has been modified.\n");
+            } else { // Otherwise, add new data
+                weeklyTemperatures.add(temperatures);
+                this.week++;
+                outputArea.append("Data for Week #" + week + " has been entered.\n");
+            }
+
+
+            weekField.setText("");
+            for (JTextField field : temperatureFields) {
+                field.setText("");
+            }
+
+        } catch (NumberFormatException ex) {
+            outputArea.append("Invalid input. Please enter numbers only.\n");
+        }
+    }
+
+    private void modifyData(JTextField weekField, JTextArea outputArea) {
+        if (weeklyTemperatures.isEmpty()) {
+            outputArea.append("No data has been entered yet. Nothing to modify.\n");
+            return;
+        }
+
+        try {
+            int weekToModify = Integer.parseInt(weekField.getText()) - 1;
+            if (weekToModify < 0 || weekToModify >= weeklyTemperatures.size()) {
+                outputArea.append("Invalid week number. Please try again.\n");
+                return;
+            }
+
+            double[] temperatures = weeklyTemperatures.get(weekToModify);
+            for (int i = 0; i < 7; i++) {
+                temperatureFields[i].setText(String.valueOf(temperatures[i]));
+            }
+
+            outputArea.append("Data for Week #" + (weekToModify + 1) + " loaded for modification. Enter new values and click 'Enter Data'.\n");
+
+        } catch (NumberFormatException ex) {
+            outputArea.append("Invalid input. Please enter a number for the week.\n");
+        }
+    }
+
+    private void printData(JTextArea outputArea) {
+        if (weeklyTemperatures.isEmpty()) {
+            outputArea.append("No data has been entered yet.\n");
+            return;
+        }
+
+        double overallTotal = 0;
+        int totalDays = 0;
+
+        for (int week = 0; week < weeklyTemperatures.size(); week++) {
+            double[] temperatures = weeklyTemperatures.get(week);
+            double weeklySum = 0;
+
+            outputArea.append("\nWeek #" + (week + 1) + "\n");
+            for (int i = 0; i < 7; i++) {
+                outputArea.append(daysOfWeek[i] + ": " + temperatures[i] + "\n");
+                weeklySum += temperatures[i];
+            }
+
+            double weeklyAverage = weeklySum / 7;
+            outputArea.append("Average for this week: " + weeklyAverage + "\n");
+
+            overallTotal += weeklySum;
+            totalDays += 7;
+        }
+
+        double overallAverage = overallTotal / totalDays;
+        outputArea.append("\nOverall Average Temperature: " + overallAverage + "\n");
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new csc320CT501GUI();
+            }
+        });
+    }
+}
