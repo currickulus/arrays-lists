@@ -1,0 +1,137 @@
+import java.util.Arrays;
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.*;
+import java.io.*;
+public class csc320CT5O1 {
+
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        List<double[]> weeklyTemperatures = new ArrayList<>();
+        int week = 1;
+        String[] daysOfWeek = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+
+        do {
+            displayMenu();
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+                case 1:
+                    enterWeeklyData(scanner, weeklyTemperatures, week++, daysOfWeek);
+                    break;
+                case 2:
+                    modifyData(scanner, weeklyTemperatures, daysOfWeek);
+                    break;
+                case 3:
+                    printData(weeklyTemperatures, daysOfWeek);
+                    break;
+                case 4:
+                    System.out.println("Exiting the program. Goodbye!");
+                    scanner.close();
+                    return;
+
+
+            }
+
+        } while (true);
+
+
+    }
+
+    private static void displayMenu() {
+        System.out.println("\nMenu:");
+        System.out.println("1. Enter data for the current week");
+        System.out.println("2. Modify data for a previous week");
+        System.out.println("3. Print collected data");
+        System.out.println("4. Exit");
+        System.out.print("Enter your choice: ");
+    }
+
+    private static void enterWeeklyData(Scanner scanner, List<double[]> weeklyTemperatures, int week, String[] daysOfWeek) {
+        if (week > 52) {
+            System.out.println("You've already entered data for all 52 weeks.");
+            return;
+        }
+
+        System.out.println("\nWeek #" + week);
+        double[] temperatures = new double[7];
+        for (int i = 0; i < 7; i++) {
+            System.out.print("Enter temperature for " + daysOfWeek[i] + ": ");
+            temperatures[i] = scanner.nextDouble();
+        }
+        weeklyTemperatures.add(temperatures);
+    }
+
+    private static void modifyData(Scanner scanner, List<double[]> weeklyTemperatures, String[] daysOfWeek) {
+        if (weeklyTemperatures.isEmpty()) {
+            System.out.println("No data has been entered yet. Nothing to modify.");
+            return;
+        }
+
+
+        System.out.print("Enter the week number you want to modify (1-" + weeklyTemperatures.size() + "): ");
+        int weekToModify = scanner.nextInt() - 1;
+        scanner.nextLine();
+
+
+        if (weekToModify < 0 || weekToModify >= weeklyTemperatures.size()) {
+            System.out.println("Invalid week number. Please try again.");
+            return;
+        }
+
+
+        System.out.print("Enter the day of the week to modify: ");
+        String dayToModify = scanner.nextLine();
+        int dayIndex = Arrays.asList(daysOfWeek).indexOf(dayToModify);
+
+        if (dayIndex == -1) {
+            System.out.println("Invalid day of the week. Please try again.");
+            return;
+        }
+
+        System.out.print("Enter the new temperature for " + dayToModify + ": ");
+        double newTemperature = scanner.nextDouble();
+
+
+        double[] temperatures = weeklyTemperatures.get(weekToModify);
+        temperatures[dayIndex] = newTemperature;
+
+        System.out.println("Data for Week #" + (weekToModify + 1) + ", " + dayToModify + " has been updated to " + newTemperature);
+    }
+
+    private static void printData(List<double[]> weeklyTemperatures, String[] daysOfWeek) {
+        if (weeklyTemperatures.isEmpty()) {
+            System.out.println("No data has been entered yet.");
+            return;
+        }
+
+        double overallTotal = 0;
+        int totalDays = 0;
+
+        for (int week = 0; week < weeklyTemperatures.size(); week++) {
+            double[] temperatures = weeklyTemperatures.get(week);
+            double weeklySum = 0;
+
+            System.out.println("\nWeek #" + (week + 1));
+            for (int i = 0; i < 7; i++) {
+                System.out.println(daysOfWeek[i] + ": " + temperatures[i]);
+                weeklySum += temperatures[i];
+            }
+
+            double weeklyAverage = weeklySum / 7;
+
+            System.out.println("Average for this week: " + weeklyAverage);
+
+            overallTotal += weeklySum;
+            totalDays += 7;
+        }
+
+
+    }
+}
+
+
+
+
