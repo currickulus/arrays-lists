@@ -122,8 +122,7 @@ public class csc320CT5O1 {
 
             double weeklyAverage = weeklySum / 7;
 
-            System.out.println("Average for this week: " + weeklyAverage);
-
+            System.out.printf("Average for this week: %.2f%n", weeklyAverage);
             overallTotal += weeklySum;
             totalDays += 7;
         }
